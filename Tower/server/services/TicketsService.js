@@ -4,25 +4,24 @@ import { BadRequest, Forbidden } from "../utils/Errors"
 class TicketsService {
   async getMyTickets(accountId) {
     // See getMyBids GregsList
-    const myTickets = await dbContext.Tickets.find(accountId).populate('event').populate('account')
+    const myTickets = await dbContext.Tickets.find(accountId).populate('event')
     return myTickets.map(crappyObject => {
       const myTicket = crappyObject.toJSON()
       return {
-        id: myTicket.id,
+        ticketId: myTicket.id,
         accountId: myTicket.accountId,
-        eventId: myTicket.eventId
+        ...myTicket.event,
       }
     })
   }
-  // FIXME Something wrong with the get ticket functions
   async getEventTickets(eventId) {
-    const eventTickets = await dbContext.Tickets.find({ eventId: eventId }).populate('account', 'name picture')
+    const eventTickets = await dbContext.Tickets.find({ eventId: eventId }).populate('account')
     return eventTickets.map(crappyObject => {
       const eventTicket = crappyObject.toJSON()
       return {
-        id: eventTicket.id,
-        eventId: eventTicket.id,
-        accountId: eventTicket.accountId
+        ticketId: eventTicket.id,
+        eventId: eventTicket.eventId,
+        ...eventTicket.account,
       }
     })
   }
