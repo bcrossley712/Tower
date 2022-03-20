@@ -1,5 +1,5 @@
 <template>
-  <div class="event">Event component</div>
+  <div class="component"></div>
 </template>
 
 
@@ -16,4 +16,8 @@ export default {
 
 
 <style lang="scss" scoped>
+.img-md {
+  height: 70px;
+  width: 70px;
+}
 </style>
