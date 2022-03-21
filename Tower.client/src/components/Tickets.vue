@@ -1,20 +1,26 @@
 <template>
-  <router-link :to="{ name: 'EventDetails', params: { id: towerEvent.id } }">
-    <div class="row m-2">
-      <div
-        class="
-          col-12
-          border border-4
-          rounded
-          border-grey
-          text-light
-          shadow
-          bg-img
-          p-0
-          d-flex
-          align-items-end
-        "
-      >
+  <div class="row m-2">
+    <div
+      class="
+        col-12
+        border border-4
+        rounded
+        border-grey
+        text-light
+        shadow
+        bg-img
+        p-0
+        d-flex
+        flex-column
+        justify-content-between
+      "
+    >
+      <div class="text-end">
+        <button class="btn btn-danger px-3 m-2" @click="deleteTicket">
+          Not Going
+        </button>
+      </div>
+      <router-link :to="{ name: 'EventDetails', params: { id: ticket.id } }">
         <div
           class="
             div
@@ -26,30 +32,29 @@
             flex-column
             w-100
             fw-bold
+            text-light
           "
         >
-          <span class="fs-4 text-shadow">{{ towerEvent.name }}</span>
-          <span class="text-shadow">{{ towerEvent.location }}</span>
-          <span class="text-shadow">{{
-            dateFormat.format(new Date(towerEvent.startDate))
-          }}</span>
+          <span class="fs-4">{{ ticket.name }}</span>
+          <span>{{ ticket.location }}</span>
+          <span>{{ dateFormat.format(new Date(ticket.startDate)) }}</span>
           <span
-            v-if="towerEvent.capacity <= 0"
+            v-if="ticket.capacity <= 0"
             class="rounded bg-danger darken-20 w-100 text-center text-light"
             >At capacity</span
           >
           <span
-            v-else-if="towerEvent.isCanceled"
+            v-else-if="ticket.isCanceled"
             class="rounded bg-danger darken-20 w-100 text-center text-light"
             >Cancelled</span
           >
           <span v-else class="text-end text-shadow"
-            >{{ towerEvent.capacity }} spots left</span
+            >{{ ticket.capacity }} spots left</span
           >
         </div>
-      </div>
+      </router-link>
     </div>
-  </router-link>
+  </div>
 </template>
 
 
@@ -57,9 +62,10 @@
 import { computed, ref } from "@vue/reactivity"
 import Pop from "../utils/Pop"
 import { logger } from "../utils/Logger"
+import { ticketsService } from "../services/TicketsService"
 export default {
   props: {
-    towerEvent: {
+    ticket: {
       type: Object,
       required: true
     }
@@ -70,7 +76,15 @@ export default {
     });
     return {
       dateFormat,
-      backgroundImage: computed(() => `url('${props.towerEvent.coverImg}')`)
+      backgroundImage: computed(() => `url('${props.ticket.coverImg}')`),
+      async deleteTicket() {
+        try {
+          await ticketsService.deleteTicket(props.ticket.ticketId)
+        } catch (error) {
+          logger.error(error)
+          Pop.toast(error.message, 'error')
+        }
+      }
     }
   }
 }
@@ -87,8 +101,6 @@ export default {
 }
 .bg-blur {
   backdrop-filter: blur(20px);
-}
-.text-shadow {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.514),
     -1px -1px 3px rgba(0, 0, 0, 0.514);
 }

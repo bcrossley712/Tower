@@ -14,16 +14,28 @@
       >
         <div class="row">
           <div class="col-md-4">
-            <img :src="activeEvent.coverImg" alt="" class="img-fluid" />
+            <img
+              :src="activeEvent.coverImg"
+              alt=""
+              class="img-fluid rounded shadow"
+            />
           </div>
           <div class="col-md-8 d-flex flex-column justify-content-between">
             <div>
-              <div class="text-end">
+              <div
+                v-if="
+                  !activeEvent.isCanceled && activeEvent.creatorId == account.id
+                "
+                class="text-end"
+              >
                 <i
+                  data-bs-toggle="modal"
+                  data-bs-target="#edit-event"
                   title="Edit event"
                   class="mdi mdi-pencil text-warning pe-2 selectable"
                 ></i>
                 <i
+                  @click="cancelEvent"
                   title="Cancel event"
                   class="mdi mdi-cancel text-danger ps-2 selectable"
                 ></i>
@@ -31,19 +43,41 @@
               <div class="d-flex justify-content-between">
                 <h3>{{ activeEvent.name }}</h3>
                 <!-- FIXME invalid time value -->
-                <!-- <h3>{{ dateFormat.format(new Date(activeEvent.startDate)) }}</h3> -->
+                <h3>
+                  <!-- {{ dateFormat.format(new Date(activeEvent.startDate)) }} -->
+                  {{ activeEvent.startDate }}
+                </h3>
               </div>
               <div class="d-flex justify-content-between">
                 <h4>{{ activeEvent.location }}</h4>
                 <!-- FIXME invalid time value -->
-                <!-- <h4>{{timeFormat.format(new Date(activeEvent.startDate))}}</h4> -->
+                <h4>
+                  <!-- {{ timeFormat.format(new Date(activeEvent.startDate)) }} -->
+                </h4>
               </div>
               <p class="lh-lg">{{ activeEvent.description }}</p>
             </div>
-            <div class="d-flex justify-content-between">
+            <span
+              v-if="activeEvent.isCanceled"
+              class="rounded bg-danger darken-20 w-100 text-center text-light"
+            >
+              Cancelled</span
+            >
+            <span
+              v-else-if="activeEvent.capacity <= 0"
+              class="rounded bg-danger darken-20 w-100 text-center text-light"
+              >At capacity</span
+            >
+            <div v-else class="d-flex justify-content-between">
               <h4>{{ activeEvent.capacity }} spots left</h4>
-              <div>
-                <button class="btn btn-warning p-2 px-5">
+              <!-- FIXME currently not working -->
+              <div v-if="hasTicket">
+                <button @click="popToast" class="btn btn-success p-2 px-5">
+                  RSVP'd <i class="mdi mdi-human"></i>
+                </button>
+              </div>
+              <div v-else>
+                <button @click="createTicket" class="btn btn-warning p-2 px-5">
                   Attend <i class="mdi mdi-human"></i>
                 </button>
               </div>
@@ -79,7 +113,9 @@
               style="height: 100px"
             ></textarea>
             <div class="text-end">
-              <button class="btn btn-success my-2 p-2">Post comment</button>
+              <button @click="addComment" class="btn btn-success my-2 p-2">
+                Post comment
+              </button>
             </div>
           </div>
           <div class="d-flex" v-for="c in comments" :key="c.id">
@@ -89,6 +125,10 @@
       </div>
     </div>
   </div>
+  <Modal id="edit-event">
+    <template #title>Edit Event</template>
+    <template #body><EditEventForm /></template>
+  </Modal>
 </template>
 
 
@@ -96,7 +136,7 @@
 import { computed, ref } from "@vue/reactivity"
 import Pop from "../utils/Pop"
 import { logger } from "../utils/Logger"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { onMounted, watchEffect } from "@vue/runtime-core"
 import { eventsService } from "../services/EventsService"
 import { AppState } from "../AppState"
@@ -108,12 +148,12 @@ export default {
     const route = useRoute()
     let dateFormat = new Intl.DateTimeFormat("en", {
       dateStyle: "short",
-    })
-    let timeFormat = new Intl.DateTimeFormat("en", {
       timeStyle: "short"
     })
+    // let timeFormat = new Intl.DateTimeFormat("en", {
+    // })
 
-    watchEffect(async () => {
+    onMounted(async () => {
       try {
         AppState.activeEvent = {}
         await eventsService.getById(route.params.id)
@@ -127,13 +167,49 @@ export default {
     return {
       editable,
       dateFormat,
-      timeFormat,
+      // timeFormat,
       route,
+      account: computed(() => AppState.account),
       activeEvent: computed(() => AppState.activeEvent),
       comments: computed(() => AppState.comments),
       tickets: computed(() => AppState.tickets),
+      myTickets: computed(() => AppState.myTickets),
       user: computed(() => AppState.user),
-      backgroundImage: computed(() => `url('${AppState.activeEvent.coverImg}')`)
+      hasTicket: computed(() => AppState.tickets.find((t) => t.accountId == AppState.account.id)),
+      backgroundImage: computed(() => `url('${AppState.activeEvent.coverImg}')`),
+      async addComment() {
+        try {
+          editable.value.eventId = route.params.id
+          await commentsService.createComment(editable.value)
+          editable.value = {}
+        } catch (error) {
+          logger.error(error)
+          Pop.toast(error.message, 'error')
+        }
+      },
+      async createTicket() {
+        try {
+          await ticketsService.createTicket(AppState.user.id, route.params.id)
+          Pop.toast('RSVP submitted', 'success')
+        } catch (error) {
+          logger.error(error)
+          Pop.toast(error.message, 'error')
+        }
+      },
+      async cancelEvent() {
+        try {
+          if (await Pop.confirm('Cancel Event', 'Are you sure you want to cancel this event? This can not be undone.', 'warning', 'Yes, cancel event!')) {
+            await eventsService.cancelEvent(AppState.activeEvent.id)
+            Pop.toast('Event cancelled!', 'success')
+          }
+        } catch (error) {
+          logger.error(error)
+          Pop.toast(error.message, 'error')
+        }
+      },
+      popToast() {
+        Pop.toast(`You're already going!`, 'warning')
+      }
 
     }
   }

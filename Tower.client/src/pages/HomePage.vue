@@ -26,7 +26,11 @@
       <div class="col-12"><Filter /></div>
     </div>
     <div class="row p-3">
-      <div class="col-12 col-md-4 col-lg-3" v-for="t in towerEvent" :key="t.id">
+      <div
+        class="col-12 col-md-4 col-lg-3"
+        v-for="t in towerEvents"
+        :key="t.id"
+      >
         <TowerEvent :towerEvent="t" />
       </div>
     </div>
@@ -40,20 +44,22 @@ import { onMounted, watchEffect } from "@vue/runtime-core"
 import { eventsService } from "../services/EventsService";
 import { logger } from "../utils/Logger";
 import Pop from "../utils/Pop";
+import { useRoute } from "vue-router";
 export default {
   name: 'Home',
   setup() {
-    watchEffect(async () => {
+    const route = useRoute()
+    onMounted(async () => {
       try {
         AppState.activeEvent = {}
-        await eventsService.getEvents()
+        await eventsService.getAllEvents(route.params.query)
       } catch (error) {
         logger.error(error)
         Pop.toast(error.message, 'error')
       }
     })
     return {
-      towerEvent: computed(() => AppState.towerEvents)
+      towerEvents: computed(() => AppState.towerEvents)
     }
   }
 }

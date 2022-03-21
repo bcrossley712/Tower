@@ -31,9 +31,18 @@
       >
         <router-link :to="{ name: 'Account' }">
           <div class="list-group-item list-group-item-action hoverable">
-            Manage Account
+            My Event Details
           </div>
         </router-link>
+        <div>
+          <div
+            data-bs-toggle="modal"
+            data-bs-target="#edit-account"
+            class="list-group-item list-group-item-action hoverable"
+          >
+            Edit Account
+          </div>
+        </div>
         <div
           class="list-group-item list-group-item-action hoverable text-danger"
           @click="logout"

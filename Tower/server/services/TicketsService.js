@@ -41,7 +41,7 @@ class TicketsService {
   async remove(ticketId, userId) {
     const ticketToRemove = await dbContext.Tickets.findById(ticketId)
     const thisEvent = await dbContext.TowerEvents.findById(ticketToRemove.eventId)
-    if (ticketToRemove.creatorId.toString() !== userId) {
+    if (ticketToRemove.accountId.toString() !== userId) {
       throw new Forbidden('Not allowed to delete this ticket')
     }
     thisEvent.capacity += 1

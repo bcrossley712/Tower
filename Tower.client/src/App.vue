@@ -5,6 +5,14 @@
   <main>
     <router-view />
   </main>
+  <Modal id="create-event">
+    <template #title>New Event</template>
+    <template #body><CreateEventForm /></template>
+  </Modal>
+  <Modal id="edit-account">
+    <template #title>Edit Account</template>
+    <template #body><EditAccountForm /></template>
+  </Modal>
 </template>
 
 <script>
