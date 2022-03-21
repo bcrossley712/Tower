@@ -7,7 +7,7 @@
         <div class="row h-100 ps-3">
           <div
             class="
-              col-md-4
+              col-12
               h-100
               d-flex
               flex-column
@@ -27,7 +27,7 @@
     </div>
     <div class="row p-3">
       <div
-        class="col-12 col-md-4 col-lg-3"
+        class="col-12 col-md-4 col-xl-3"
         v-for="t in towerEvents"
         :key="t.id"
       >
@@ -85,7 +85,7 @@ export default {
 }
 .bg-img {
   background-image: url("https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y29ycG9yYXRlJTIwZXZlbnQlMjAlMjBzZWF0c3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=400&q=60");
-  height: 30vh;
+  min-height: 30vh;
   // background-position: center;
   background-size: cover;
   backdrop-filter: blur(1px);

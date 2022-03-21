@@ -29,6 +29,7 @@ class EventsService {
     original.coverImg = update.coverImg ? update.coverImg : original.coverImg
     original.location = update.location ? update.location : original.location
     original.capacity = update.capacity !== null ? update.capacity : original.capacity
+    original.startDate = update.startDate ? update.startDate : original.startDate
     await original.save()
     return original
   }

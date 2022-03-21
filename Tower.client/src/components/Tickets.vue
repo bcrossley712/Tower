@@ -37,7 +37,7 @@
         >
           <span class="fs-4">{{ ticket.name }}</span>
           <span>{{ ticket.location }}</span>
-          <span>{{ dateFormat.format(new Date(ticket.startDate)) }}</span>
+          <span>{{ new Date(ticket.startDate).toLocaleString() }}</span>
           <span
             v-if="ticket.capacity <= 0"
             class="rounded bg-danger darken-20 w-100 text-center text-light"

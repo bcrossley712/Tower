@@ -3,7 +3,7 @@
     <div class="row p-3 text-light">
       <h3 class="fw-bold">My Events</h3>
       <div
-        class="col-12 col-md-4 col-lg-3"
+        class="col-12 col-md-4 col-xl-3"
         v-for="t in towerEvents"
         :key="t.id"
       >

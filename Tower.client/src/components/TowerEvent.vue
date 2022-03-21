@@ -31,7 +31,7 @@
           <span class="fs-4 text-shadow">{{ towerEvent.name }}</span>
           <span class="text-shadow">{{ towerEvent.location }}</span>
           <span class="text-shadow">{{
-            dateFormat.format(new Date(towerEvent.startDate))
+            new Date(towerEvent.startDate).toDateString()
           }}</span>
           <span
             v-if="towerEvent.capacity <= 0"

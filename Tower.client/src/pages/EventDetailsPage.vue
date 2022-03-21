@@ -42,17 +42,14 @@
               </div>
               <div class="d-flex justify-content-between">
                 <h3>{{ activeEvent.name }}</h3>
-                <!-- FIXME invalid time value -->
                 <h3>
-                  <!-- {{ dateFormat.format(new Date(activeEvent.startDate)) }} -->
-                  {{ activeEvent.startDate }}
+                  {{ new Date(activeEvent.startDate).toDateString() }}
                 </h3>
               </div>
               <div class="d-flex justify-content-between">
                 <h4>{{ activeEvent.location }}</h4>
-                <!-- FIXME invalid time value -->
                 <h4>
-                  <!-- {{ timeFormat.format(new Date(activeEvent.startDate)) }} -->
+                  {{ new Date(activeEvent.startDate).toLocaleTimeString() }}
                 </h4>
               </div>
               <p class="lh-lg">{{ activeEvent.description }}</p>
@@ -71,7 +68,7 @@
             <div v-else class="d-flex justify-content-between">
               <h4>{{ activeEvent.capacity }} spots left</h4>
               <!-- FIXME currently not working -->
-              <div v-if="hasTicket">
+              <div v-if="user.isAuthenticated && hasTicket">
                 <button @click="popToast" class="btn btn-success p-2 px-5">
                   RSVP'd <i class="mdi mdi-human"></i>
                 </button>
@@ -153,15 +150,18 @@ export default {
     // let timeFormat = new Intl.DateTimeFormat("en", {
     // })
 
-    onMounted(async () => {
-      try {
-        AppState.activeEvent = {}
-        await eventsService.getById(route.params.id)
-        await ticketsService.getEventTickets(route.params.id)
-        await commentsService.getEventComments(route.params.id)
-      } catch (error) {
-        logger.error(error)
-        Pop.toast(error.message, 'error')
+    watchEffect(async () => {
+      if (route.params.id) {
+        try {
+          AppState.activeEvent = {}
+          await eventsService.getById(route.params.id)
+          await ticketsService.getEventTickets(route.params.id)
+          await commentsService.getEventComments(route.params.id)
+        } catch (error) {
+          logger.error(error)
+          Pop.toast(error.message, 'error')
+        }
+
       }
     })
     return {
@@ -175,7 +175,7 @@ export default {
       tickets: computed(() => AppState.tickets),
       myTickets: computed(() => AppState.myTickets),
       user: computed(() => AppState.user),
-      hasTicket: computed(() => AppState.tickets.find((t) => t.accountId == AppState.account.id)),
+      hasTicket: computed(() => AppState.tickets.find((t) => t.id == AppState.account.id || t.accountId == AppState.account.id)),
       backgroundImage: computed(() => `url('${AppState.activeEvent.coverImg}')`),
       async addComment() {
         try {
@@ -189,8 +189,11 @@ export default {
       },
       async createTicket() {
         try {
-          await ticketsService.createTicket(AppState.user.id, route.params.id)
-          Pop.toast('RSVP submitted', 'success')
+          if (AppState.user.isAuthenticated) {
+            await ticketsService.createTicket(AppState.user.id, route.params.id)
+            Pop.toast('RSVP submitted', 'success')
+          }
+          else { Pop.toast('You must be logged in to RSVP', 'error') }
         } catch (error) {
           logger.error(error)
           Pop.toast(error.message, 'error')

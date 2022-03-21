@@ -27,11 +27,14 @@ class EventsService {
     return res.data
   }
   async editEvent(eventId, body) {
+    const update = AppState.towerEvents.findIndex(e => e.id == eventId)
     const res = await api.put(`api/events/${eventId}`, body)
+    logger.log('[editEvent]', res.data)
   }
   async cancelEvent(id) {
     const res = await api.delete('api/events/' + id)
     logger.log('[cancelEvent]', res.data)
+    AppState.activeEvent.isCanceled = true
   }
 }
 

@@ -20,14 +20,19 @@ class TicketsService {
     }
     const res = await api.post('api/tickets', body)
     logger.log('[createTicket]', res.data)
-    AppState.tickets = [...AppState.tickets, res.data]
-    AppState.myTickets = [...AppState.myTickets, res.data]
+    const newTicket = { ...res.data, name: res.data.account.name, picture: res.data.account.picture }
+    AppState.tickets = [...AppState.tickets, newTicket]
+    AppState.myTickets = [...AppState.myTickets, newTicket]
+    AppState.activeEvent.capacity -= 1
   }
   async deleteTicket(id) {
+    const ticket = AppState.myTickets.find(t => t.ticketId == id)
+    const ticketEvent = AppState.towerEvents.find(e => e.id == ticket.id)
     const res = await api.delete('api/tickets/' + id)
     logger.log('[deleteTicket]', res.data)
-    AppState.myTickets = AppState.myTickets.filter(t => t.id != id)
-    AppState.tickets = AppState.tickets.filter(t => t.id != id)
+    AppState.myTickets = AppState.myTickets.filter(t => t.ticketId != id)
+    AppState.tickets = AppState.tickets.filter(t => t.ticketId != id)
+    ticketEvent.capacity++
   }
 }
 export const ticketsService = new TicketsService()
