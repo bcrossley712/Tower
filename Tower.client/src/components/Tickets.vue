@@ -1,5 +1,5 @@
 <template>
-  <div class="row m-2">
+  <div class="row m-2" v-if="new Date(ticket.startDate) > new Date()">
     <div
       class="
         col-12

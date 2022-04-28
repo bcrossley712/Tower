@@ -1,5 +1,8 @@
 <template>
-  <router-link :to="{ name: 'EventDetails', params: { id: towerEvent.id } }">
+  <router-link
+    v-if="new Date(towerEvent.startDate) > new Date()"
+    :to="{ name: 'EventDetails', params: { id: towerEvent.id } }"
+  >
     <div class="row m-2">
       <div
         class="
